@@ -1,0 +1,7 @@
+langchain
+openai
+python-pptx
+# Optional: if you plan to use LangGraph (install only when ready)
+langgraph
+pydantic
+rich
