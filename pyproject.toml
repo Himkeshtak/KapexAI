@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kapexai"
+version = "0.1.0"
+description = "Multi-agent AI consulting and report generation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "httpx",
+    "jinja2",
+    "langchain",
+    "matplotlib",
+    "openai",
+    "pydantic",
+    "python-dotenv",
+    "python-pptx",
+    "rich",
+    "uvicorn[standard]",
+]
+
+[project.optional-dependencies]
+experimental = ["langgraph"]
+
+[project.scripts]
+kapexai = "kapexai.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["kapexai*"]

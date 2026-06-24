@@ -1,7 +1,11 @@
+fastapi
+httpx
+jinja2
 langchain
+matplotlib
 openai
-python-pptx
-# Optional: if you plan to use LangGraph (install only when ready)
-langgraph
 pydantic
+python-dotenv
+python-pptx
 rich
+uvicorn[standard]

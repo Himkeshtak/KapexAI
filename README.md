@@ -1,39 +1,33 @@
-# KapexAI — AI Consultant (Multi-agent, Financial Advice)
+# KapexAI
 
-Basic scaffold for an AI Consultant system that aggregates multiple agents' outputs
-and generates a PowerPoint report (SWOT, Porter's Five Forces, financial summary).
+KapexAI is a multi-agent consulting scaffold with a FastAPI service and
+PowerPoint report generation.
 
-Quick start
+## Setup
 
-1. Create a virtual environment and install dependencies:
-
-```bash
+```powershell
 python -m venv .venv
-source .venv/bin/activate
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-2. Set your OpenAI API key (or other LLM provider env vars):
+Copy `.env.example` to `.env` and add provider credentials when using
+LLM-backed tools.
 
-```bash
-export OPENAI_API_KEY="sk-..."
+## Commands
+
+```powershell
+python -m kapexai consult "Acme" "Increase revenue"
+python -m kapexai report "Acme Financial Services"
+python -m kapexai serve --reload
+python example.py
 ```
 
-3. Run the demo (uses pure-Python agents by default):
+The API exposes `POST /consult`, `GET /diagram`, and `GET /health`.
 
-```bash
-python examples/run_demo.py
-```
+## Structure
 
-What's here
-
-- `src/agents/pure_python_agents.py`: simple rule-based agents (SWOT, Porter, financial summary).
-- `src/agents/langchain_agents.py`: skeleton for LangChain / LangGraph-based agents.
-- `src/ppt_generator.py`: create a PPTX from agents' outputs using `python-pptx`.
-- `examples/run_demo.py`: example that ties everything together.
-
-Next steps
-
-- Implement full LangChain and LangGraph agents.
-- Add templates and styling for PPT slides.
-- Add orchestration to run agents in parallel and aggregate results.
+- `kapexai/`: application package and entry points
+- `kapexai/tools/`: reusable analysis, LLM, and presentation tools
+- `experimental/`: prototypes and research
+- `logs/`: runtime logs

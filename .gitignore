@@ -3,3 +3,7 @@ __pycache__/
 *.pyc
 env/
 *.pptx
+.env
+logs/*
+!logs/.gitkeep
+output/
