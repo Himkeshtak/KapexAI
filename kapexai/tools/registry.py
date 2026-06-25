@@ -26,6 +26,9 @@ from kapexai.tools.economics import (
     world_bank_indicator,
 )
 from kapexai.tools.debt_calculators import DEBT_CALCULATOR_TOOLS
+from kapexai.tools.debt_management_calculators import (
+    DEBT_MANAGEMENT_CALCULATOR_TOOLS,
+)
 from kapexai.tools.equity_calculators import EQUITY_CALCULATOR_TOOLS
 from kapexai.tools.finance_tools import (
     calculate_financial_ratios,
@@ -45,7 +48,20 @@ from kapexai.tools.legal_tools import (
     federal_register_search,
     legal_issue_register,
 )
+from kapexai.tools.indian_finance_calculators import (
+    INDIAN_FINANCE_CALCULATOR_TOOLS,
+)
+from kapexai.tools.macroeconomics_calculators import (
+    MACROECONOMICS_CALCULATOR_TOOLS,
+)
+from kapexai.tools.microeconomics_calculators import (
+    MICROECONOMICS_CALCULATOR_TOOLS,
+)
+from kapexai.tools.personal_finance_calculators import (
+    PERSONAL_FINANCE_CALCULATOR_TOOLS,
+)
 from kapexai.tools.real_estate_calculators import REAL_ESTATE_CALCULATOR_TOOLS
+from kapexai.tools.retirement_calculators import RETIREMENT_CALCULATOR_TOOLS
 from kapexai.tools.research import (
     crossref_research_search,
     gdelt_news_search,
@@ -53,6 +69,7 @@ from kapexai.tools.research import (
     wikipedia_search,
 )
 from kapexai.tools.tax_salary_calculators import TAX_SALARY_CALCULATOR_TOOLS
+from kapexai.tools.sales_calculators import SALES_CALCULATOR_TOOLS
 
 
 @dataclass(frozen=True)
@@ -481,6 +498,14 @@ REAL_ESTATE_MARKET_CALCULATORS = {
     "occupancy_rate_calculator",
     "price_per_square_foot_calculator",
     "price_per_square_meter_calculator",
+    "home_value_calculator",
+    "ltv_calculator",
+    "real_estate_commission_calculator",
+    "rent_calculator",
+    "rental_property_calculator",
+    "rent_increase_calculator",
+    "rent_or_buy_calculator",
+    "what_to_offer_on_house_calculator",
 }
 
 REAL_ESTATE_MANAGEMENT_CALCULATORS = {
@@ -491,6 +516,10 @@ REAL_ESTATE_MANAGEMENT_CALCULATORS = {
     "net_operating_income_calculator",
     "occupancy_rate_calculator",
     "prorated_rent_calculator",
+    "real_estate_commission_calculator",
+    "rental_commission_calculator",
+    "rental_property_calculator",
+    "rent_increase_calculator",
 }
 
 REAL_ESTATE_STRATEGY_CALCULATORS = {
@@ -501,6 +530,83 @@ REAL_ESTATE_STRATEGY_CALCULATORS = {
     "gross_rent_multiplier_calculator",
     "mortgage_refinance_calculator",
     "net_operating_income_calculator",
+    "home_affordability_calculator",
+    "home_value_calculator",
+    "ltv_calculator",
+    "mortgage_comparison_calculator",
+    "rent_or_buy_calculator",
+    "rental_property_calculator",
+    "true_cost_real_estate_commission_calculator",
+}
+
+PERSONAL_MANAGEMENT_CALCULATORS = {
+    "bank_reconciliation_calculator",
+    "budget_calculator",
+    "cell_phone_plan_calculator",
+    "emergency_fund_calculator",
+    "fifty_thirty_twenty_rule_calculator",
+    "net_worth_calculator",
+    "seventy_twenty_ten_rule_money_calculator",
+    "subscription_waste_calculator",
+    "unpaid_work_calculator",
+    "wedding_budget_calculator",
+}
+
+PERSONAL_ECONOMIST_CALCULATORS = {
+    "apc_calculator",
+    "lifetime_earnings_calculator",
+    "pakistan_income_tax_calculator",
+    "quiz_us_income_percentile_calculator",
+    "salary_inflation_calculator",
+    "us_income_percentile_calculator",
+}
+
+PERSONAL_LEGAL_CALCULATORS = {
+    "pakistan_income_tax_calculator",
+    "second_stimulus_900_billion_bill_calculator",
+    "second_stimulus_cash_act_calculator",
+    "second_stimulus_heals_act_calculator",
+    "second_stimulus_heroes_act_calculator",
+    "stimulus_caaf_vs_heals_vs_heroes_calculator",
+    "stimulus_check_40k_cap_calculator",
+    "stimulus_check_calculator",
+    "third_stimulus_american_rescue_plan_calculator",
+    "unemployment_benefit_cares_act_calculator",
+    "unemployment_benefit_heals_vs_heroes_calculator",
+    "unemployment_benefit_lwa_calculator",
+    "zakat_calculator",
+}
+
+DEBT_MANAGEMENT_BUSINESS_CALCULATORS = {
+    "apr_calculator",
+    "blended_rate_calculator",
+    "debt_calculator",
+    "debt_avalanche_calculator",
+    "debt_consolidation_calculator",
+    "debt_payoff_calculator",
+    "debt_snowball_calculator",
+    "debt_to_income_ratio_calculator",
+    "finance_charge_calculator",
+    "loan_comparison_calculator",
+    "refinance_calculator",
+    "refinance_break_even_calculator",
+}
+
+DEBT_MANAGEMENT_STRATEGY_CALCULATORS = {
+    "blended_rate_calculator",
+    "cash_out_refinance_calculator",
+    "debt_consolidation_calculator",
+    "loan_comparison_calculator",
+    "refinance_calculator",
+    "refinance_break_even_calculator",
+}
+
+DEBT_MANAGEMENT_LEGAL_CALCULATORS = {
+    "eidl_emergency_advance_calculator",
+    "paycheck_protection_program_loan_calculator",
+    "post_judgment_interest_calculator",
+    "student_loan_forgiveness_calculator",
+    "student_loan_repayment_covid19_calculator",
 }
 
 
@@ -563,6 +669,28 @@ def _real_estate_calculator_agents(tool_name: str) -> tuple[str, ...]:
     return tuple(agents)
 
 
+def _personal_finance_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in PERSONAL_MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in PERSONAL_ECONOMIST_CALCULATORS:
+        agents.append("economist")
+    if tool_name in PERSONAL_LEGAL_CALCULATORS:
+        agents.append("legal_advisor")
+    return tuple(agents)
+
+
+def _debt_management_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in DEBT_MANAGEMENT_BUSINESS_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in DEBT_MANAGEMENT_STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    if tool_name in DEBT_MANAGEMENT_LEGAL_CALCULATORS:
+        agents.append("legal_advisor")
+    return tuple(agents)
+
+
 CALCULATOR_DEFINITIONS = tuple(
     ToolDefinition(
         calculator,
@@ -613,6 +741,126 @@ REAL_ESTATE_CALCULATOR_DEFINITIONS = tuple(
     for calculator in REAL_ESTATE_CALCULATOR_TOOLS
 )
 
+PERSONAL_FINANCE_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _personal_finance_calculator_agents(calculator.name),
+        "personal_finance_calculator",
+        "Local deterministic personal-finance formula",
+    )
+    for calculator in PERSONAL_FINANCE_CALCULATOR_TOOLS
+)
+
+DEBT_MANAGEMENT_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _debt_management_calculator_agents(calculator.name),
+        "debt_management_calculator",
+        "Local deterministic consumer debt-management formula",
+    )
+    for calculator in DEBT_MANAGEMENT_CALCULATOR_TOOLS
+)
+
+RETIREMENT_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        ("financial_accounting_asset", "business_strategy"),
+        "retirement_calculator",
+        "Local deterministic retirement or annuity formula",
+    )
+    for calculator in RETIREMENT_CALCULATOR_TOOLS
+)
+
+SALES_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        (
+            "financial_accounting_asset",
+            "market_analysis",
+            "business_management",
+            "business_strategy",
+        ),
+        "sales_calculator",
+        "Local deterministic sales, margin, pricing, or discount formula",
+    )
+    for calculator in SALES_CALCULATOR_TOOLS
+)
+
+MICROECONOMICS_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        (
+            "financial_accounting_asset",
+            "economist",
+            "business_management",
+            "business_strategy",
+        ),
+        "microeconomics_calculator",
+        "Local deterministic microeconomics or operating formula",
+    )
+    for calculator in MICROECONOMICS_CALCULATOR_TOOLS
+)
+
+MACROECONOMICS_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        (
+            "economist",
+            "business_strategy",
+            "market_analysis",
+            "financial_accounting_asset",
+        ),
+        "macroeconomics_calculator",
+        "Local deterministic macroeconomics or banking-liquidity formula",
+    )
+    for calculator in MACROECONOMICS_CALCULATOR_TOOLS
+)
+
+INDIAN_POLICY_CALCULATORS = {
+    "atal_pension_yojana_calculator",
+    "elss_calculator",
+    "epf_calculator",
+    "hra_exemption_calculator",
+    "nps_india_calculator",
+    "post_office_monthly_income_scheme_calculator",
+    "ppf_calculator",
+    "sukanya_samriddhi_yojana_calculator",
+    "tds_interest_calculator",
+}
+
+INDIAN_STRATEGY_CALCULATORS = {
+    "atal_pension_yojana_calculator",
+    "elss_calculator",
+    "epf_calculator",
+    "lumpsum_calculator",
+    "nps_india_calculator",
+    "ppf_calculator",
+    "sip_calculator",
+    "sip_plus_lumpsum_calculator",
+    "sukanya_samriddhi_yojana_calculator",
+    "systematic_withdrawal_plan_calculator",
+}
+
+
+def _indian_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in INDIAN_POLICY_CALCULATORS:
+        agents.extend(("economist", "legal_advisor"))
+    if tool_name in INDIAN_STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    return tuple(dict.fromkeys(agents))
+
+
+INDIAN_FINANCE_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _indian_calculator_agents(calculator.name),
+        "indian_finance_calculator",
+        "Local deterministic Indian finance or policy-sensitive formula",
+    )
+    for calculator in INDIAN_FINANCE_CALCULATOR_TOOLS
+)
+
 DEFINITIONS = (
     *CORE_DEFINITIONS,
     *CALCULATOR_DEFINITIONS,
@@ -620,6 +868,13 @@ DEFINITIONS = (
     *DEBT_CALCULATOR_DEFINITIONS,
     *TAX_SALARY_CALCULATOR_DEFINITIONS,
     *REAL_ESTATE_CALCULATOR_DEFINITIONS,
+    *PERSONAL_FINANCE_CALCULATOR_DEFINITIONS,
+    *DEBT_MANAGEMENT_CALCULATOR_DEFINITIONS,
+    *RETIREMENT_CALCULATOR_DEFINITIONS,
+    *SALES_CALCULATOR_DEFINITIONS,
+    *MICROECONOMICS_CALCULATOR_DEFINITIONS,
+    *MACROECONOMICS_CALCULATOR_DEFINITIONS,
+    *INDIAN_FINANCE_CALCULATOR_DEFINITIONS,
 )
 
 TOOL_REGISTRY = {definition.tool.name: definition for definition in DEFINITIONS}

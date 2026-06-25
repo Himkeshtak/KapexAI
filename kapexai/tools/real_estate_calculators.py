@@ -641,6 +641,551 @@ def prorated_rent_calculator(
     }
 
 
+@tool
+def home_affordability_calculator(
+    gross_monthly_income: float,
+    monthly_debt_payments: float,
+    down_payment: float,
+    annual_interest_rate: float,
+    term_years: float = 30,
+    front_end_ratio: float = 0.28,
+    back_end_ratio: float = 0.36,
+    monthly_taxes_insurance_hoa: float = 0.0,
+) -> dict:
+    """Estimate affordable home price from income, debt ratios, and mortgage terms."""
+    housing_limit = gross_monthly_income * front_end_ratio
+    debt_limit = gross_monthly_income * back_end_ratio - monthly_debt_payments
+    principal_interest_limit = (
+        min(housing_limit, debt_limit) - monthly_taxes_insurance_hoa
+    )
+    if principal_interest_limit <= 0:
+        return {"affordable_home_price": 0.0, "maximum_monthly_housing_cost": 0.0}
+    periods = round(term_years * 12)
+    monthly_rate = annual_interest_rate / 12
+    if monthly_rate == 0:
+        loan = principal_interest_limit * periods
+    else:
+        loan = principal_interest_limit * (
+            1 - (1 + monthly_rate) ** -periods
+        ) / monthly_rate
+    return {
+        "maximum_monthly_housing_cost": min(housing_limit, debt_limit),
+        "maximum_principal_and_interest": principal_interest_limit,
+        "affordable_loan_amount": loan,
+        "affordable_home_price": loan + down_payment,
+    }
+
+
+@tool
+def home_mortgage_calculator(
+    home_price: float,
+    down_payment: float,
+    annual_interest_rate: float,
+    term_years: float,
+) -> dict:
+    """Calculate a home mortgage from price, down payment, rate, and term."""
+    loan_amount = home_price - down_payment
+    result = _mortgage_summary(loan_amount, annual_interest_rate, term_years)
+    result.update({"loan_amount": loan_amount, "down_payment": down_payment})
+    return result
+
+
+@tool
+def home_value_calculator(
+    current_home_value: float,
+    annual_appreciation_rate: float,
+    years: float,
+    improvements_value_added: float = 0.0,
+) -> dict:
+    """Project U.S. home value from appreciation and value-adding improvements."""
+    projected = (
+        current_home_value * (1 + annual_appreciation_rate) ** years
+        + improvements_value_added
+    )
+    return {
+        "projected_home_value": projected,
+        "projected_appreciation": projected - current_home_value,
+    }
+
+
+@tool
+def interest_only_mortgage_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    interest_only_years: float,
+    total_term_years: float,
+) -> dict:
+    """Calculate interest-only payment and later amortizing payment."""
+    interest_only_payment = loan_amount * annual_interest_rate / 12
+    remaining_years = total_term_years - interest_only_years
+    if remaining_years <= 0:
+        raise ValueError("interest_only_years must be less than total_term_years")
+    amortizing = _mortgage_summary(
+        loan_amount, annual_interest_rate, remaining_years
+    )
+    return {
+        "interest_only_monthly_payment": interest_only_payment,
+        "post_interest_only_monthly_payment": amortizing["periodic_payment"],
+        "interest_paid_during_interest_only_period": (
+            interest_only_payment * round(interest_only_years * 12)
+        ),
+    }
+
+
+@tool
+def jumbo_loan_calculator(
+    home_price: float,
+    down_payment: float,
+    annual_interest_rate: float,
+    term_years: float,
+    conforming_loan_limit: float,
+) -> dict:
+    """Calculate jumbo mortgage payment and whether the loan exceeds a supplied limit."""
+    loan_amount = home_price - down_payment
+    result = _mortgage_summary(loan_amount, annual_interest_rate, term_years)
+    result.update(
+        {
+            "loan_amount": loan_amount,
+            "conforming_loan_limit": conforming_loan_limit,
+            "is_jumbo": loan_amount > conforming_loan_limit,
+        }
+    )
+    return result
+
+
+@tool
+def ltv_calculator(
+    loan_amount: float, property_value: float
+) -> dict:
+    """Calculate loan-to-value ratio and borrower equity."""
+    _positive(property_value, "property_value")
+    ltv = loan_amount / property_value
+    return {
+        "loan_to_value_ratio": ltv,
+        "loan_to_value_percent": ltv * 100,
+        "equity": property_value - loan_amount,
+    }
+
+
+@tool
+def mortgage_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    term_years: float,
+) -> dict:
+    """Calculate fixed-rate mortgage payment, interest, and total cost."""
+    return _mortgage_summary(loan_amount, annual_interest_rate, term_years)
+
+
+@tool
+def mortgage_acceleration_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    term_years: float,
+    extra_monthly_payment: float,
+) -> dict:
+    """Calculate payoff acceleration and interest savings from extra payments."""
+    baseline = _mortgage_summary(
+        loan_amount, annual_interest_rate, term_years
+    )
+    accelerated = _simulate_payoff(
+        loan_amount,
+        annual_interest_rate,
+        baseline["periodic_payment"],
+        extra_monthly_payment,
+    )
+    return {
+        "standard_monthly_payment": baseline["periodic_payment"],
+        "accelerated_payoff": accelerated,
+        "months_saved": baseline["number_of_payments"]
+        - accelerated["periods_to_payoff"],
+        "interest_saved": baseline["total_interest"]
+        - accelerated["total_interest"],
+    }
+
+
+@tool
+def mortgage_amortization_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    term_years: float,
+    preview_periods: int = 12,
+) -> dict:
+    """Calculate mortgage summary and an initial amortization schedule preview."""
+    summary = _mortgage_summary(
+        loan_amount, annual_interest_rate, term_years
+    )
+    payment = summary["periodic_payment"]
+    balance = loan_amount
+    monthly_rate = annual_interest_rate / 12
+    schedule = []
+    for period in range(1, min(preview_periods, summary["number_of_payments"]) + 1):
+        interest = balance * monthly_rate
+        principal = payment - interest
+        balance = max(0.0, balance - principal)
+        schedule.append(
+            {
+                "period": period,
+                "payment": payment,
+                "principal": principal,
+                "interest": interest,
+                "ending_balance": balance,
+            }
+        )
+    return {**summary, "schedule_preview": schedule}
+
+
+@tool
+def mortgage_with_extra_payments_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    term_years: float,
+    extra_monthly_payment: float = 0.0,
+    annual_lump_sum: float = 0.0,
+) -> dict:
+    """Calculate mortgage payoff with monthly and annual extra payments."""
+    baseline = _mortgage_summary(
+        loan_amount, annual_interest_rate, term_years
+    )
+    balance = loan_amount
+    monthly_rate = annual_interest_rate / 12
+    total_interest = 0.0
+    months = 0
+    while balance > 1e-8 and months < 1200:
+        interest = balance * monthly_rate
+        payment = baseline["periodic_payment"] + extra_monthly_payment
+        if (months + 1) % 12 == 0:
+            payment += annual_lump_sum
+        principal = min(balance, payment - interest)
+        if principal <= 0:
+            raise ValueError("payments do not amortize the loan")
+        balance -= principal
+        total_interest += interest
+        months += 1
+    return {
+        "standard_monthly_payment": baseline["periodic_payment"],
+        "months_to_payoff": months,
+        "years_to_payoff": months / 12,
+        "total_interest": total_interest,
+        "months_saved": baseline["number_of_payments"] - months,
+        "interest_saved": baseline["total_interest"] - total_interest,
+    }
+
+
+@tool
+def mortgage_with_taxes_and_insurance_calculator(
+    loan_amount: float,
+    annual_interest_rate: float,
+    term_years: float,
+    annual_property_tax: float,
+    annual_homeowners_insurance: float,
+    monthly_hoa: float = 0.0,
+    monthly_mortgage_insurance: float = 0.0,
+) -> dict:
+    """Calculate total monthly housing payment including escrow and fees."""
+    mortgage = _mortgage_summary(
+        loan_amount, annual_interest_rate, term_years
+    )
+    taxes = annual_property_tax / 12
+    insurance = annual_homeowners_insurance / 12
+    total = (
+        mortgage["periodic_payment"]
+        + taxes
+        + insurance
+        + monthly_hoa
+        + monthly_mortgage_insurance
+    )
+    return {
+        "principal_and_interest": mortgage["periodic_payment"],
+        "monthly_property_tax": taxes,
+        "monthly_homeowners_insurance": insurance,
+        "monthly_hoa": monthly_hoa,
+        "monthly_mortgage_insurance": monthly_mortgage_insurance,
+        "total_monthly_payment": total,
+    }
+
+
+@tool
+def mortgage_comparison_calculator(
+    loan_amount: float,
+    option_a_rate: float,
+    option_a_term_years: float,
+    option_a_costs: float,
+    option_b_rate: float,
+    option_b_term_years: float,
+    option_b_costs: float,
+) -> dict:
+    """Compare payments and total costs of two mortgage options."""
+    option_a = _mortgage_summary(
+        loan_amount, option_a_rate, option_a_term_years
+    )
+    option_b = _mortgage_summary(
+        loan_amount, option_b_rate, option_b_term_years
+    )
+    total_a = option_a["total_paid"] + option_a_costs
+    total_b = option_b["total_paid"] + option_b_costs
+    return {
+        "option_a": {**option_a, "costs": option_a_costs, "all_in_cost": total_a},
+        "option_b": {**option_b, "costs": option_b_costs, "all_in_cost": total_b},
+        "lower_all_in_cost_option": "A" if total_a < total_b else "B",
+        "all_in_cost_difference": abs(total_a - total_b),
+    }
+
+
+@tool
+def real_estate_commission_calculator(
+    sale_price: float,
+    total_commission_rate: float,
+    listing_side_share: float = 0.5,
+) -> dict:
+    """Calculate total and side-specific real-estate commissions."""
+    total = sale_price * total_commission_rate
+    return {
+        "total_commission": total,
+        "listing_side_commission": total * listing_side_share,
+        "buyer_side_commission": total * (1 - listing_side_share),
+        "seller_proceeds_before_other_costs": sale_price - total,
+    }
+
+
+@tool
+def realtor_commission_with_vat_calculator(
+    sale_price: float,
+    commission_rate: float,
+    vat_rate: float,
+) -> dict:
+    """Calculate real-estate commission plus VAT."""
+    commission = sale_price * commission_rate
+    vat = commission * vat_rate
+    return {
+        "commission_before_vat": commission,
+        "vat": vat,
+        "commission_including_vat": commission + vat,
+    }
+
+
+@tool
+def rent_calculator(
+    monthly_rent: float,
+    lease_months: int,
+    monthly_utilities: float = 0.0,
+    one_time_fees: float = 0.0,
+    security_deposit: float = 0.0,
+) -> dict:
+    """Calculate total and effective monthly rental cost."""
+    recurring = (monthly_rent + monthly_utilities) * lease_months
+    nonrefundable_total = recurring + one_time_fees
+    return {
+        "recurring_lease_cost": recurring,
+        "nonrefundable_total_cost": nonrefundable_total,
+        "cash_required_including_deposit": nonrefundable_total
+        + security_deposit,
+        "effective_monthly_cost": nonrefundable_total / lease_months,
+    }
+
+
+@tool
+def rental_commission_calculator(
+    monthly_rent: float,
+    commission_months: float = 1.0,
+    commission_rate: float | None = None,
+    annual_rent_basis: bool = False,
+) -> dict:
+    """Calculate rental-agent commission from rent months or an annual-rent rate."""
+    if commission_rate is not None:
+        basis = monthly_rent * (12 if annual_rent_basis else 1)
+        commission = basis * commission_rate
+    else:
+        commission = monthly_rent * commission_months
+    return {"rental_commission": commission}
+
+
+@tool
+def rental_property_calculator(
+    purchase_price: float,
+    monthly_rent: float,
+    vacancy_rate: float,
+    annual_operating_expenses: float,
+    annual_debt_service: float = 0.0,
+    initial_cash_invested: float | None = None,
+) -> dict:
+    """Calculate rental-property NOI, cap rate, cash flow, and cash-on-cash return."""
+    gross_rent = monthly_rent * 12
+    effective_rent = gross_rent * (1 - vacancy_rate)
+    noi = effective_rent - annual_operating_expenses
+    cash_flow = noi - annual_debt_service
+    return {
+        "gross_annual_rent": gross_rent,
+        "effective_annual_rent": effective_rent,
+        "net_operating_income": noi,
+        "capitalization_rate": noi / purchase_price if purchase_price else None,
+        "annual_cash_flow": cash_flow,
+        "cash_on_cash_return": (
+            cash_flow / initial_cash_invested
+            if initial_cash_invested
+            else None
+        ),
+    }
+
+
+@tool
+def rent_increase_calculator(
+    current_monthly_rent: float,
+    increase_rate: float | None = None,
+    new_monthly_rent: float | None = None,
+) -> dict:
+    """Calculate new rent or derive the percentage rent increase."""
+    if increase_rate is None and new_monthly_rent is None:
+        raise ValueError("Provide increase_rate or new_monthly_rent")
+    if new_monthly_rent is None:
+        new_monthly_rent = current_monthly_rent * (1 + float(increase_rate))
+    change = new_monthly_rent - current_monthly_rent
+    return {
+        "new_monthly_rent": new_monthly_rent,
+        "monthly_increase": change,
+        "increase_rate": change / current_monthly_rent,
+        "annual_increase": change * 12,
+    }
+
+
+@tool
+def rent_or_buy_calculator(
+    home_price: float,
+    down_payment: float,
+    annual_mortgage_rate: float,
+    mortgage_term_years: float,
+    monthly_rent: float,
+    comparison_years: int,
+    annual_home_appreciation: float = 0.03,
+    annual_rent_growth: float = 0.03,
+    annual_property_cost_rate: float = 0.02,
+    buying_closing_costs: float = 0.0,
+    selling_cost_rate: float = 0.06,
+) -> dict:
+    """Compare simplified multi-year cash cost of renting versus buying."""
+    loan = home_price - down_payment
+    mortgage = _mortgage_summary(
+        loan, annual_mortgage_rate, mortgage_term_years
+    )
+    months = comparison_years * 12
+    balance = _balance_after_payments(
+        loan,
+        annual_mortgage_rate,
+        mortgage["periodic_payment"],
+        months,
+    )
+    future_home_value = home_price * (
+        1 + annual_home_appreciation
+    ) ** comparison_years
+    owner_equity = (
+        future_home_value * (1 - selling_cost_rate) - balance
+    )
+    ownership_cash_out = (
+        down_payment
+        + buying_closing_costs
+        + mortgage["periodic_payment"] * months
+        + home_price * annual_property_cost_rate * comparison_years
+    )
+    ownership_net_cost = ownership_cash_out - owner_equity
+    rent_cost = sum(
+        monthly_rent * (1 + annual_rent_growth) ** (month // 12)
+        for month in range(months)
+    )
+    return {
+        "estimated_net_cost_buying": ownership_net_cost,
+        "estimated_cost_renting": rent_cost,
+        "estimated_owner_equity": owner_equity,
+        "lower_cost_option": "buy" if ownership_net_cost < rent_cost else "rent",
+    }
+
+
+@tool
+def simple_mortgage_calculator(
+    principal: float,
+    annual_interest_rate: float,
+    term_years: float,
+) -> dict:
+    """Calculate the monthly principal-and-interest payment for a mortgage."""
+    result = _mortgage_summary(
+        principal, annual_interest_rate, term_years
+    )
+    return {"monthly_payment": result["periodic_payment"]}
+
+
+@tool
+def true_cost_real_estate_commission_calculator(
+    sale_price: float,
+    commission_rate: float,
+    vat_or_sales_tax_rate: float = 0.0,
+    additional_fees: float = 0.0,
+    income_tax_rate_on_deductible_cost: float = 0.0,
+) -> dict:
+    """Estimate all-in commission cost and optional after-tax economic cost."""
+    commission = sale_price * commission_rate
+    tax = commission * vat_or_sales_tax_rate
+    gross_cost = commission + tax + additional_fees
+    tax_benefit = gross_cost * income_tax_rate_on_deductible_cost
+    return {
+        "commission": commission,
+        "tax_on_commission": tax,
+        "additional_fees": additional_fees,
+        "gross_cost": gross_cost,
+        "estimated_tax_benefit": tax_benefit,
+        "estimated_after_tax_cost": gross_cost - tax_benefit,
+    }
+
+
+@tool
+def va_loan_calculator(
+    home_price: float,
+    down_payment: float,
+    annual_interest_rate: float,
+    term_years: float,
+    funding_fee_rate: float,
+    finance_funding_fee: bool = True,
+) -> dict:
+    """Estimate VA loan payment with a supplied current funding-fee rate."""
+    base_loan = home_price - down_payment
+    funding_fee = base_loan * funding_fee_rate
+    financed_amount = base_loan + funding_fee if finance_funding_fee else base_loan
+    mortgage = _mortgage_summary(
+        financed_amount, annual_interest_rate, term_years
+    )
+    return {
+        "base_loan_amount": base_loan,
+        "funding_fee": funding_fee,
+        "financed_loan_amount": financed_amount,
+        "monthly_principal_and_interest": mortgage["periodic_payment"],
+        "caution": "Funding-fee exemptions and rates require current VA eligibility rules.",
+    }
+
+
+@tool
+def what_to_offer_on_house_calculator(
+    comparable_values: list[float],
+    estimated_repairs: float = 0.0,
+    desired_discount_rate: float = 0.0,
+    maximum_budget: float | None = None,
+) -> dict:
+    """Estimate a house offer from comparables, repairs, discount, and budget."""
+    if not comparable_values:
+        raise ValueError("At least one comparable value is required")
+    comparable_value = sum(comparable_values) / len(comparable_values)
+    indicated_offer = (
+        comparable_value * (1 - desired_discount_rate) - estimated_repairs
+    )
+    offer = (
+        min(indicated_offer, maximum_budget)
+        if maximum_budget is not None
+        else indicated_offer
+    )
+    return {
+        "average_comparable_value": comparable_value,
+        "indicated_offer": indicated_offer,
+        "recommended_offer_cap": max(0.0, offer),
+    }
+
+
 REAL_ESTATE_CALCULATOR_TOOLS = (
     three_x_rent_calculator,
     affo_calculator,
@@ -670,4 +1215,27 @@ REAL_ESTATE_CALCULATOR_TOOLS = (
     price_per_square_foot_calculator,
     price_per_square_meter_calculator,
     prorated_rent_calculator,
+    home_affordability_calculator,
+    home_mortgage_calculator,
+    home_value_calculator,
+    interest_only_mortgage_calculator,
+    jumbo_loan_calculator,
+    ltv_calculator,
+    mortgage_calculator,
+    mortgage_acceleration_calculator,
+    mortgage_amortization_calculator,
+    mortgage_with_extra_payments_calculator,
+    mortgage_with_taxes_and_insurance_calculator,
+    mortgage_comparison_calculator,
+    real_estate_commission_calculator,
+    realtor_commission_with_vat_calculator,
+    rent_calculator,
+    rental_commission_calculator,
+    rental_property_calculator,
+    rent_increase_calculator,
+    rent_or_buy_calculator,
+    simple_mortgage_calculator,
+    true_cost_real_estate_commission_calculator,
+    va_loan_calculator,
+    what_to_offer_on_house_calculator,
 )
