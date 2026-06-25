@@ -37,6 +37,26 @@ globally.
 
 The API exposes `POST /consult`, `GET /diagram`, and `GET /health`.
 
+## Specialist Agents
+
+KapexAI includes ten separately scoped agents:
+
+- Orchestrator
+- Market Analysis
+- Business Management Consultant
+- Economist
+- Business Strategist and Planner
+- Astrologer and Future Predictor
+- Financial, Accounting, and Asset Management
+- Legal Advisor
+- Presentation and Designer
+- Mermaid Diagram and Workflow
+
+Use `GET /agents` for the registry, `GET /agents?include_prompts=true` for all
+system prompts, or `GET /agents/{agent_key}/prompt` for one prompt. The
+`POST /consult` payload may include `requested_agents`, or
+`context.include_all_agents=true` to route work to every specialist.
+
 ## Structure
 
 - `kapexai/`: application package and entry points

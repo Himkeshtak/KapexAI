@@ -48,17 +48,32 @@ async def consult(payload: dict):
     return JSONResponse(AgentManager().consult(request))
 
 
+@app.get("/agents")
+async def agents(include_prompts: bool = False):
+    return {
+        "agents": AgentManager().list_agents(include_prompts=include_prompts)
+    }
+
+
+@app.get("/agents/{agent_key}/prompt")
+async def agent_prompt(agent_key: str):
+    try:
+        agent = AgentManager().get_agent(agent_key)
+    except KeyError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=404)
+    return {
+        "key": agent.key,
+        "name": agent.name,
+        "system_prompt": agent.system_prompt,
+    }
+
+
 @app.get("/diagram")
 async def diagram():
-    mermaid = """
-graph LR
-    C[Client Request] --> MA(MarketAnalysis)
-    MA --> FM(FinancialModeling)
-    FM --> ST(Strategy)
-    ST --> CP(Compliance)
-    CP --> R(Recommendation)
-"""
-    return {"format": "mermaid", "source": mermaid.strip()}
+    return {
+        "format": "mermaid",
+        "source": AgentManager().workflow_mermaid(),
+    }
 
 
 @app.get("/health")
