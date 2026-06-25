@@ -1,6 +1,5 @@
 fastapi
 httpx
-jinja2
 langchain
 matplotlib
 openai

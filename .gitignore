@@ -7,3 +7,8 @@ env/
 logs/*
 !logs/.gitkeep
 output/
+Frontend/node_modules/
+Frontend/.next/
+Frontend/out/
+Frontend/.env.local
+.tools/

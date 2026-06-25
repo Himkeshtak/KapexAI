@@ -1,7 +1,14 @@
 """Professional static charts for financial reports and presentations."""
 
+import os
+import tempfile
 from pathlib import Path
 from typing import Mapping, Optional, Sequence, Union
+
+os.environ.setdefault(
+    "MPLCONFIGDIR",
+    str(Path(tempfile.gettempdir()) / "kapexai-matplotlib"),
+)
 
 import matplotlib
 
