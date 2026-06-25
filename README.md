@@ -68,6 +68,26 @@ from kapexai.tools import RedisToolCache, configure_tool_cache
 configure_tool_cache(RedisToolCache(redis_client))
 ```
 
+### Finance calculators
+
+The financial agent includes 60 deterministic calculator tools in
+`kapexai/tools/finance_calculators.py`. They cover returns and growth, interest
+and time value of money, deposits and investments, valuation and capital
+budgeting, fund and financing costs, performance ratios, hedging, drawdown,
+moving averages, and Value at Risk. Relevant subsets are also available to the
+market, economist, management, and strategy agents.
+
+All rates use decimal form (`0.08` means 8%) unless a tool field explicitly
+says `percent`. Cash-flow lists for NPV and IRR begin at time zero. Calculator
+outputs are estimates and do not include taxes, trading costs, institution-
+specific conventions, or legal/accounting judgments unless supplied as inputs.
+Core conventions were cross-checked against the
+[SEC Investor.gov compound-interest calculator](https://www.investor.gov/financial-tools-calculators/calculators/compound-interest-calculator),
+[Microsoft NPV](https://support.microsoft.com/en-us/excel/functions/npv-function),
+[IRR](https://support.microsoft.com/en-us/excel/functions/irr-function), and
+[MIRR](https://support.microsoft.com/en-us/excel/functions/mirr-function)
+definitions, plus Basel market-risk guidance for VaR.
+
 ## Specialist Agents
 
 KapexAI includes ten separately scoped agents:

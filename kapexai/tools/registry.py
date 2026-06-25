@@ -33,6 +33,7 @@ from kapexai.tools.finance_tools import (
     sec_company_lookup,
     sec_company_submissions,
 )
+from kapexai.tools.finance_calculators import FINANCE_CALCULATOR_TOOLS
 from kapexai.tools.foresight import (
     future_signpost_matrix,
     jpl_horizons_ephemeris,
@@ -74,7 +75,7 @@ class ToolDefinition:
         }
 
 
-DEFINITIONS = (
+CORE_DEFINITIONS = (
     ToolDefinition(
         gdelt_news_search,
         ("market_analysis", "economist", "business_strategy", "legal_advisor"),
@@ -260,6 +261,84 @@ DEFINITIONS = (
         "NASA JPL Horizons API",
     ),
 )
+
+ECONOMIST_CALCULATORS = {
+    "apy_calculator",
+    "basis_point_calculator",
+    "compound_interest_rate_calculator",
+    "discount_rate_calculator",
+    "ear_calculator",
+    "effective_annual_yield_calculator",
+    "effective_interest_rate_calculator",
+    "equivalent_rate_aer_calculator",
+    "real_rate_of_return_calculator",
+}
+
+MANAGEMENT_CALCULATORS = {
+    "mva_calculator",
+    "nopat_calculator",
+    "opportunity_cost_calculator",
+    "roce_calculator",
+    "roi_calculator",
+    "ttm_calculator",
+    "week_over_week_calculator",
+}
+
+MARKET_CALCULATORS = {
+    "annualized_rate_of_return_calculator",
+    "appreciation_calculator",
+    "cagr_calculator",
+    "capital_gains_yield_calculator",
+    "holding_period_return_calculator",
+    "maximum_drawdown_calculator",
+    "moving_average_calculator",
+    "percentage_return_calculator",
+    "rate_of_return_calculator",
+    "value_at_risk_calculator",
+}
+
+STRATEGY_CALCULATORS = {
+    "dcf_calculator",
+    "discount_rate_calculator",
+    "expected_return_calculator",
+    "expected_utility_calculator",
+    "irr_calculator",
+    "mirr_calculator",
+    "mva_calculator",
+    "nopat_calculator",
+    "npv_calculator",
+    "opportunity_cost_calculator",
+    "perpetuity_calculator",
+    "present_value_calculator",
+    "roce_calculator",
+    "roi_calculator",
+}
+
+
+def _calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in ECONOMIST_CALCULATORS:
+        agents.append("economist")
+    if tool_name in MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in MARKET_CALCULATORS:
+        agents.append("market_analysis")
+    if tool_name in STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    return tuple(agents)
+
+
+CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _calculator_agents(calculator.name),
+        "finance_calculator",
+        "Local deterministic standard finance formula",
+    )
+    for calculator in FINANCE_CALCULATOR_TOOLS
+)
+
+DEFINITIONS = (*CORE_DEFINITIONS, *CALCULATOR_DEFINITIONS)
 
 TOOL_REGISTRY = {definition.tool.name: definition for definition in DEFINITIONS}
 
