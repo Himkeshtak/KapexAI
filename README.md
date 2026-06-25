@@ -37,6 +37,37 @@ globally.
 
 The API exposes `POST /consult`, `GET /diagram`, and `GET /health`.
 
+## Agent Tools
+
+KapexAI provides a LangChain-compatible tool registry with public-data,
+research, finance, legal, planning, chart, PowerPoint, Mermaid, and foresight
+tools. Tool metadata is available at:
+
+- `GET /tools`
+- `GET /tools?agent_key=market_analysis`
+- `GET /agents/{agent_key}/tools`
+
+Most tools need no credentials. Optional free-service credentials belong in
+`.env`:
+
+```text
+SEC_USER_AGENT=KapexAI your-real-email@example.com
+OPENALEX_API_KEY=
+COURTLISTENER_API_TOKEN=
+CROSSREF_MAILTO=
+```
+
+Each agent receives only its curated tool subset through
+`get_tools_for_agent(agent_key)`. The default development cache is an in-memory
+TTL cache. When Redis is available, configure the same layer without changing
+tool code:
+
+```python
+from kapexai.tools import RedisToolCache, configure_tool_cache
+
+configure_tool_cache(RedisToolCache(redis_client))
+```
+
 ## Specialist Agents
 
 KapexAI includes ten separately scoped agents:

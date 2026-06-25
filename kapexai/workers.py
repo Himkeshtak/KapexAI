@@ -50,6 +50,10 @@ class Agent:
             else "No upstream outputs have been supplied."
         )
         task = assignment or self.default_assignment(request)
+        tool_descriptions = "\n".join(
+            f"- {tool.name}: {tool.description}"
+            for tool in self.get_tools()
+        ) or "- No executable tools are configured for this specialist."
         prompt = self.system_prompt or (
             "You are a business specialist. Analyze only the assignment within "
             "your stated role and make assumptions explicit."
@@ -62,6 +66,12 @@ class Agent:
             f"Your scoped assignment: {task}\n"
             f"Context supplied by the user:\n{context}\n\n"
             f"UPSTREAM SPECIALIST OUTPUTS\n{upstream}\n\n"
+            f"AVAILABLE TOOLS\n{tool_descriptions}\n\n"
+            "TOOL USE PROTOCOL\n"
+            "- Use tools when current facts, calculations, or artifacts are needed.\n"
+            "- Treat tool results as evidence, preserve their source, date, and caveats.\n"
+            "- Never invent a successful result when a service or credential is unavailable.\n"
+            "- Cross-check high-impact claims when more than one source is available.\n\n"
             "Complete the assignment using your required output structure. "
             "Do not answer outside your mandate; instead name the specialist "
             "whose input is required."
@@ -90,6 +100,7 @@ class Agent:
             "capabilities": list(self.capabilities),
             "deliverables": list(self.deliverables),
             "dependencies": list(self.dependencies),
+            "tools": self.tool_names(),
             "recommendation": (
                 f"{self.name} is assigned to {scoped_assignment} "
                 "and is ready for LLM-backed execution."
@@ -111,10 +122,20 @@ class Agent:
             "capabilities": list(self.capabilities),
             "deliverables": list(self.deliverables),
             "dependencies": list(self.dependencies),
+            "tools": self.tool_names(),
         }
         if include_prompt:
             metadata["system_prompt"] = self.system_prompt
         return metadata
+
+    def get_tools(self) -> list[Any]:
+        """Return this specialist's curated LangChain BaseTool objects."""
+        from kapexai.tools.registry import get_tools_for_agent
+
+        return get_tools_for_agent(self.key)
+
+    def tool_names(self) -> List[str]:
+        return [tool.name for tool in self.get_tools()]
 
 
 class OrchestratorAgent(Agent):

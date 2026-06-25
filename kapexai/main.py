@@ -6,9 +6,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from kapexai.env_loader import load_environment
 from kapexai.workers import AgentManager, ConsultationRequest
+from kapexai.tools.registry import list_tool_metadata
 
 
+load_environment()
 app = FastAPI(title="KapexAI Consulting API")
 
 frontend_origins = [
@@ -65,6 +68,29 @@ async def agent_prompt(agent_key: str):
         "key": agent.key,
         "name": agent.name,
         "system_prompt": agent.system_prompt,
+    }
+
+
+@app.get("/tools")
+async def tools(agent_key: str | None = None):
+    if agent_key:
+        try:
+            agent = AgentManager().get_agent(agent_key)
+        except KeyError as exc:
+            return JSONResponse({"error": str(exc)}, status_code=404)
+        agent_key = agent.key
+    return {"tools": list_tool_metadata(agent_key)}
+
+
+@app.get("/agents/{agent_key}/tools")
+async def agent_tools(agent_key: str):
+    try:
+        agent = AgentManager().get_agent(agent_key)
+    except KeyError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=404)
+    return {
+        "agent": agent.metadata(),
+        "tools": list_tool_metadata(agent.key),
     }
 
 
