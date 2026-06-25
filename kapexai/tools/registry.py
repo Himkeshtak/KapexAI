@@ -45,12 +45,14 @@ from kapexai.tools.legal_tools import (
     federal_register_search,
     legal_issue_register,
 )
+from kapexai.tools.real_estate_calculators import REAL_ESTATE_CALCULATOR_TOOLS
 from kapexai.tools.research import (
     crossref_research_search,
     gdelt_news_search,
     openalex_research_search,
     wikipedia_search,
 )
+from kapexai.tools.tax_salary_calculators import TAX_SALARY_CALCULATOR_TOOLS
 
 
 @dataclass(frozen=True)
@@ -415,6 +417,92 @@ DEBT_STRATEGY_CALCULATORS = {
     "lgd_calculator",
 }
 
+TAX_MANAGEMENT_CALCULATORS = {
+    "twelve_hour_shift_pay_calculator",
+    "annual_income_calculator",
+    "billable_hours_calculator",
+    "bill_rate_calculator",
+    "future_salary_calculator",
+    "gross_to_net_calculator",
+    "hourly_to_salary_calculator",
+    "net_to_gross_calculator",
+    "overtime_calculator",
+    "pay_raise_calculator",
+    "prorated_salary_calculator",
+    "salary_calculator",
+    "salary_inflation_calculator",
+    "salary_to_hourly_calculator",
+    "time_and_a_half_calculator",
+}
+
+TAX_ECONOMIST_CALCULATORS = {
+    "adjusted_gross_income_calculator",
+    "amt_calculator",
+    "biden_tax_plan_calculator",
+    "build_back_better_calculator",
+    "fica_tax_calculator",
+    "gst_calculator",
+    "gst_qst_canada_calculator",
+    "modified_adjusted_gross_income_calculator",
+    "sales_tax_calculator",
+    "state_tax_calculator",
+    "tax_bracket_calculator",
+    "trump_taxes_vs_your_taxes_calculator",
+    "vat_calculator",
+}
+
+TAX_LEGAL_CALCULATORS = {
+    "alabama_tax_calculator",
+    "amt_calculator",
+    "australia_income_tax_cuts_2020_21_calculator",
+    "biden_tax_plan_calculator",
+    "build_back_better_calculator",
+    "california_stimulus_check_ii_calculator",
+    "california_tax_calculator",
+    "child_tax_credit_calculator",
+    "fica_tax_calculator",
+    "illinois_tax_calculator",
+    "new_york_tax_calculator",
+    "philippines_income_tax_calculator",
+    "rmd_calculator",
+    "state_tax_calculator",
+    "tax_bracket_calculator",
+    "texas_tax_calculator",
+    "trump_taxes_vs_your_taxes_calculator",
+}
+
+REAL_ESTATE_MARKET_CALCULATORS = {
+    "adr_calculator",
+    "arv_calculator",
+    "cap_rate_calculator",
+    "gross_rent_multiplier_calculator",
+    "net_effective_rent_calculator",
+    "net_operating_income_calculator",
+    "occupancy_rate_calculator",
+    "price_per_square_foot_calculator",
+    "price_per_square_meter_calculator",
+}
+
+REAL_ESTATE_MANAGEMENT_CALCULATORS = {
+    "adr_calculator",
+    "affo_calculator",
+    "commercial_lease_calculator",
+    "net_effective_rent_calculator",
+    "net_operating_income_calculator",
+    "occupancy_rate_calculator",
+    "prorated_rent_calculator",
+}
+
+REAL_ESTATE_STRATEGY_CALCULATORS = {
+    "affo_calculator",
+    "arv_calculator",
+    "cap_rate_calculator",
+    "commercial_lease_calculator",
+    "gross_rent_multiplier_calculator",
+    "mortgage_refinance_calculator",
+    "net_operating_income_calculator",
+}
+
 
 def _calculator_agents(tool_name: str) -> tuple[str, ...]:
     agents = ["financial_accounting_asset"]
@@ -453,6 +541,28 @@ def _debt_calculator_agents(tool_name: str) -> tuple[str, ...]:
     return tuple(agents)
 
 
+def _tax_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in TAX_MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in TAX_ECONOMIST_CALCULATORS:
+        agents.append("economist")
+    if tool_name in TAX_LEGAL_CALCULATORS:
+        agents.append("legal_advisor")
+    return tuple(agents)
+
+
+def _real_estate_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in REAL_ESTATE_MARKET_CALCULATORS:
+        agents.append("market_analysis")
+    if tool_name in REAL_ESTATE_MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in REAL_ESTATE_STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    return tuple(agents)
+
+
 CALCULATOR_DEFINITIONS = tuple(
     ToolDefinition(
         calculator,
@@ -483,11 +593,33 @@ DEBT_CALCULATOR_DEFINITIONS = tuple(
     for calculator in DEBT_CALCULATOR_TOOLS
 )
 
+TAX_SALARY_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _tax_calculator_agents(calculator.name),
+        "tax_salary_calculator",
+        "Local deterministic tax, payroll, or salary formula",
+    )
+    for calculator in TAX_SALARY_CALCULATOR_TOOLS
+)
+
+REAL_ESTATE_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _real_estate_calculator_agents(calculator.name),
+        "real_estate_calculator",
+        "Local deterministic mortgage or real-estate formula",
+    )
+    for calculator in REAL_ESTATE_CALCULATOR_TOOLS
+)
+
 DEFINITIONS = (
     *CORE_DEFINITIONS,
     *CALCULATOR_DEFINITIONS,
     *EQUITY_CALCULATOR_DEFINITIONS,
     *DEBT_CALCULATOR_DEFINITIONS,
+    *TAX_SALARY_CALCULATOR_DEFINITIONS,
+    *REAL_ESTATE_CALCULATOR_DEFINITIONS,
 )
 
 TOOL_REGISTRY = {definition.tool.name: definition for definition in DEFINITIONS}

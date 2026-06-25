@@ -70,18 +70,23 @@ configure_tool_cache(RedisToolCache(redis_client))
 
 ### Finance calculators
 
-The financial agent includes 126 deterministic calculator tools:
+The financial agent includes 201 deterministic calculator tools:
 
 - 60 general calculators in `kapexai/tools/finance_calculators.py`
 - 43 equity calculators in `kapexai/tools/equity_calculators.py`
 - 23 debt and fixed-income calculators in `kapexai/tools/debt_calculators.py`
+- 47 tax and salary calculators in `kapexai/tools/tax_salary_calculators.py`
+- 28 mortgage and real-estate calculators in
+  `kapexai/tools/real_estate_calculators.py`
 
 Coverage includes returns and growth, interest and time value of money,
 capital budgeting, stock valuation, dividends, equity multiples, CAPM, beta,
 WACC, profitability and capital-efficiency ratios, bond pricing and YTM,
-duration, convexity, credit risk, leverage, liquidity, hedging, drawdown,
-moving averages, and Value at Risk. Relevant subsets are also available to the
-market, economist, management, and strategy agents.
+duration, convexity, credit risk, leverage, liquidity, payroll, salary,
+progressive tax, sales tax, RMDs, mortgages, refinancing, property operations,
+hedging, drawdown, moving averages, and Value at Risk. Relevant subsets are
+also available to the market, economist, management, strategy, and legal
+agents.
 
 All rates use decimal form (`0.08` means 8%) unless a tool field explicitly
 says `percent`. Cash-flow lists for NPV and IRR begin at time zero. Calculator
@@ -95,6 +100,15 @@ Core conventions were cross-checked against the
 definitions, the
 [SEC Investor.gov P/E definition](https://www.investor.gov/introduction-investing/investing-basics/glossary/price-earnings-pe-ratio),
 and Basel market-risk guidance for VaR.
+
+Tax rules, state and local rates, political proposals, mortgage insurance, and
+loan-program terms can change. The tools expose tax-year, rate, bracket, credit,
+and program inputs where needed instead of presenting historical assumptions as
+current legal advice. FICA defaults follow
+[IRS Topic 751](https://www.irs.gov/taxtopics/tc751), RMD logic follows the
+[IRS RMD guidance](https://www.irs.gov/retirement-plans/retirement-plan-and-ira-required-minimum-distributions-faqs),
+and adjustable-rate mortgage behavior follows
+[CFPB consumer guidance](https://www.consumerfinance.gov/ask-cfpb/what-is-an-adjustable-rate-mortgage-arm-en-1949/).
 
 ## Specialist Agents
 
