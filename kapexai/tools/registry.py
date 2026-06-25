@@ -5,6 +5,7 @@ from typing import Iterable
 
 from langchain_core.tools import BaseTool
 
+from kapexai.tools.astrology_tools import FREE_ASTROLOGY_API_TOOLS
 from kapexai.tools.artifact_tools import (
     create_finance_chart,
     create_presentation_from_outline,
@@ -861,6 +862,17 @@ INDIAN_FINANCE_CALCULATOR_DEFINITIONS = tuple(
     for calculator in INDIAN_FINANCE_CALCULATOR_TOOLS
 )
 
+ASTROLOGY_API_DEFINITIONS = tuple(
+    ToolDefinition(
+        astrology_tool,
+        ("astrologer_future",),
+        "astrology",
+        "Free Astrology API",
+        required_env=("FREE_ASTROLOGY_API_KEY",),
+    )
+    for astrology_tool in FREE_ASTROLOGY_API_TOOLS
+)
+
 DEFINITIONS = (
     *CORE_DEFINITIONS,
     *CALCULATOR_DEFINITIONS,
@@ -875,6 +887,7 @@ DEFINITIONS = (
     *MICROECONOMICS_CALCULATOR_DEFINITIONS,
     *MACROECONOMICS_CALCULATOR_DEFINITIONS,
     *INDIAN_FINANCE_CALCULATOR_DEFINITIONS,
+    *ASTROLOGY_API_DEFINITIONS,
 )
 
 TOOL_REGISTRY = {definition.tool.name: definition for definition in DEFINITIONS}

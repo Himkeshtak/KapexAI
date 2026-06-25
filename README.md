@@ -55,6 +55,7 @@ SEC_USER_AGENT=KapexAI your-real-email@example.com
 OPENALEX_API_KEY=
 COURTLISTENER_API_TOKEN=
 CROSSREF_MAILTO=
+FREE_ASTROLOGY_API_KEY=
 ```
 
 Each agent receives only its curated tool subset through
@@ -147,6 +148,22 @@ because they can change by financial year or quarterly notification. Verify
 live terms through [PFRDA](https://www.pfrda.org.in/),
 [EPFO](https://www.epfindia.gov.in/), [India Post](https://www.indiapost.gov.in/),
 and the [Income Tax Department](https://www.incometax.gov.in/).
+
+### Astrology tools
+
+The Vedic and Western Astrologer and Future Scenarios Agent has 14 optional
+[Free Astrology API](https://freeastrologyapi.com/api-docs) tools for location
+and timezone resolution, Vedic D1/Raashi, extended horoscope details, D2 Hora,
+D9 Navamsa, D10 Dasamsa, Vimshottari Maha/Antar Dasha, Shadbala, Western
+planets, houses and aspects, Panchang timing, and traditional Ashtakoot data.
+Add `FREE_ASTROLOGY_API_KEY` to `.env` after creating an API key in the
+provider dashboard.
+
+Astrology output is always labeled non-scientific and non-evidentiary. It may
+support reflection about business style, user-supplied candidate dates, or
+candidate places, but it cannot establish profitability, legal feasibility,
+investment suitability, hiring decisions, or partner quality. Birth details
+for another person must only be submitted with that person's consent.
 
 ## Specialist Agents
 

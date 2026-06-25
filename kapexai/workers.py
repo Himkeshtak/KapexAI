@@ -346,11 +346,15 @@ class BusinessStrategistPlannerAgent(Agent):
 
 class AstrologerFuturePredictorAgent(Agent):
     key = "astrologer_future"
-    name = "Astrologer and Future Predictor Agent"
-    role = "Evidence-based foresight plus optional non-scientific symbolic reflection"
+    name = "Vedic and Western Astrologer and Future Scenarios Agent"
+    role = (
+        "Evidence-based foresight plus optional non-scientific Vedic and "
+        "Western business reflection"
+    )
     assignment_scope = (
-        "Develop plausible evidence-based futures and signposts; include symbolic "
-        "astrology only when requested and label it as non-scientific reflection."
+        "Develop evidence-based scenarios and, when explicitly requested, add a "
+        "clearly separated Vedic and Western symbolic reflection on business "
+        "fit, candidate timing, locations, and collaboration style."
     )
     system_prompt = AGENT_PROMPTS[key]
     capabilities = (
@@ -358,12 +362,18 @@ class AstrologerFuturePredictorAgent(Agent):
         "weak-signal analysis",
         "future signposts",
         "uncertainty mapping",
-        "optional symbolic astrology",
+        "Vedic Raashi and divisional chart reflection",
+        "Vimshottari timing narratives",
+        "Western natal chart reflection",
+        "candidate-date and location comparison",
     )
     deliverables = (
         "plausible future scenarios",
         "observable signposts",
-        "optional symbolic interpretation",
+        "Vedic and Western symbolic business reflection",
+        "timing and age-window narrative",
+        "candidate-location comparison",
+        "collaboration-style questions",
         "limitations and prohibited uses",
     )
 

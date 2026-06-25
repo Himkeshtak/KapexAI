@@ -1,5 +1,6 @@
 """Reusable analysis and reporting tools."""
 
+from kapexai.tools.astrology_tools import FREE_ASTROLOGY_API_TOOLS
 from kapexai.tools.analysis import run_all
 from kapexai.tools.charts import (
     create_bar_chart,
@@ -54,6 +55,7 @@ __all__ = [
     "DEBT_MANAGEMENT_CALCULATOR_TOOLS",
     "EQUITY_CALCULATOR_TOOLS",
     "FINANCE_CALCULATOR_TOOLS",
+    "FREE_ASTROLOGY_API_TOOLS",
     "INDIAN_FINANCE_CALCULATOR_TOOLS",
     "get_tool",
     "get_tools_for_agent",
