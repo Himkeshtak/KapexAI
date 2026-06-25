@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "KapexAI Scenario Workbench",
-  description: "Interactive financial scenario analysis",
+  title: "KapexAI Consulting Intelligence",
+  description: "Multi-agent business consulting and decision support",
 };
 
 export default function RootLayout({

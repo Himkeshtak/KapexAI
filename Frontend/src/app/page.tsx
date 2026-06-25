@@ -1,5 +1,5 @@
-import { ScenarioWorkbench } from "@/components/ScenarioWorkbench";
+import { ChatWorkspace } from "@/components/ChatWorkspace";
 
 export default function Home() {
-  return <ScenarioWorkbench />;
+  return <ChatWorkspace />;
 }
