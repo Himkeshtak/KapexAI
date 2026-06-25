@@ -70,10 +70,16 @@ configure_tool_cache(RedisToolCache(redis_client))
 
 ### Finance calculators
 
-The financial agent includes 60 deterministic calculator tools in
-`kapexai/tools/finance_calculators.py`. They cover returns and growth, interest
-and time value of money, deposits and investments, valuation and capital
-budgeting, fund and financing costs, performance ratios, hedging, drawdown,
+The financial agent includes 126 deterministic calculator tools:
+
+- 60 general calculators in `kapexai/tools/finance_calculators.py`
+- 43 equity calculators in `kapexai/tools/equity_calculators.py`
+- 23 debt and fixed-income calculators in `kapexai/tools/debt_calculators.py`
+
+Coverage includes returns and growth, interest and time value of money,
+capital budgeting, stock valuation, dividends, equity multiples, CAPM, beta,
+WACC, profitability and capital-efficiency ratios, bond pricing and YTM,
+duration, convexity, credit risk, leverage, liquidity, hedging, drawdown,
 moving averages, and Value at Risk. Relevant subsets are also available to the
 market, economist, management, and strategy agents.
 
@@ -86,7 +92,9 @@ Core conventions were cross-checked against the
 [Microsoft NPV](https://support.microsoft.com/en-us/excel/functions/npv-function),
 [IRR](https://support.microsoft.com/en-us/excel/functions/irr-function), and
 [MIRR](https://support.microsoft.com/en-us/excel/functions/mirr-function)
-definitions, plus Basel market-risk guidance for VaR.
+definitions, the
+[SEC Investor.gov P/E definition](https://www.investor.gov/introduction-investing/investing-basics/glossary/price-earnings-pe-ratio),
+and Basel market-risk guidance for VaR.
 
 ## Specialist Agents
 

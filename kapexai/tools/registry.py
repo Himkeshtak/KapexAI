@@ -25,6 +25,8 @@ from kapexai.tools.economics import (
     world_bank_country_profile,
     world_bank_indicator,
 )
+from kapexai.tools.debt_calculators import DEBT_CALCULATOR_TOOLS
+from kapexai.tools.equity_calculators import EQUITY_CALCULATOR_TOOLS
 from kapexai.tools.finance_tools import (
     calculate_financial_ratios,
     discounted_cash_flow,
@@ -314,6 +316,105 @@ STRATEGY_CALCULATORS = {
     "roi_calculator",
 }
 
+EQUITY_MARKET_CALCULATORS = {
+    "beta_stock_calculator",
+    "capm_calculator",
+    "dividend_calculator",
+    "dividend_yield_calculator",
+    "earnings_per_share_calculator",
+    "earnings_per_share_growth_calculator",
+    "enterprise_value_calculator",
+    "ev_to_sales_calculator",
+    "free_float_calculator",
+    "market_capitalization_calculator",
+    "peg_ratio_calculator",
+    "portfolio_beta_calculator",
+    "price_to_book_ratio_calculator",
+    "price_to_cash_flow_ratio_calculator",
+    "price_to_earnings_ratio_calculator",
+    "price_to_sales_ratio_calculator",
+    "stock_calculator",
+    "stock_average_calculator",
+    "stock_split_calculator",
+}
+
+EQUITY_MANAGEMENT_CALCULATORS = {
+    "dividend_payout_ratio_calculator",
+    "dupont_analysis_calculator",
+    "economic_value_added_calculator",
+    "operating_cash_flow_ratio_calculator",
+    "retention_ratio_calculator",
+    "return_on_assets_calculator",
+    "return_on_equity_calculator",
+    "return_on_sales_calculator",
+    "roic_calculator",
+    "sustainable_growth_rate_calculator",
+}
+
+EQUITY_STRATEGY_CALCULATORS = {
+    "capm_calculator",
+    "carried_interest_calculator",
+    "cost_of_capital_calculator",
+    "cost_of_equity_calculator",
+    "dividend_discount_model_calculator",
+    "ebitda_multiple_calculator",
+    "economic_value_added_calculator",
+    "enterprise_value_calculator",
+    "ev_to_sales_calculator",
+    "graham_number_calculator",
+    "intrinsic_value_calculator",
+    "margin_of_safety_calculator",
+    "nav_calculator",
+    "residual_income_calculator",
+    "roic_calculator",
+    "sustainable_growth_rate_calculator",
+    "unlevered_beta_calculator",
+    "wacc_calculator",
+}
+
+DEBT_MARKET_CALCULATORS = {
+    "bond_convexity_calculator",
+    "bond_current_yield_calculator",
+    "bond_equivalent_yield_calculator",
+    "bond_price_calculator",
+    "bond_yield_calculator",
+    "bond_ytm_calculator",
+    "coupon_payment_calculator",
+    "coupon_rate_calculator",
+    "credit_spread_calculator",
+    "effective_duration_calculator",
+    "yield_to_maturity_calculator",
+}
+
+DEBT_ECONOMIST_CALCULATORS = {
+    "after_tax_cost_of_debt_calculator",
+    "bond_equivalent_yield_calculator",
+    "credit_spread_calculator",
+    "tax_equivalent_yield_calculator",
+}
+
+DEBT_MANAGEMENT_CALCULATORS = {
+    "altman_z_score_calculator",
+    "debt_service_coverage_ratio_calculator",
+    "debt_to_asset_ratio_calculator",
+    "debt_to_capital_ratio_calculator",
+    "debt_to_equity_calculator",
+    "defensive_interval_ratio_calculator",
+    "interest_coverage_ratio_calculator",
+    "lgd_calculator",
+    "quick_ratio_calculator",
+    "times_interest_earned_ratio_calculator",
+}
+
+DEBT_STRATEGY_CALCULATORS = {
+    "after_tax_cost_of_debt_calculator",
+    "altman_z_score_calculator",
+    "credit_spread_calculator",
+    "debt_service_coverage_ratio_calculator",
+    "debt_to_capital_ratio_calculator",
+    "lgd_calculator",
+}
+
 
 def _calculator_agents(tool_name: str) -> tuple[str, ...]:
     agents = ["financial_accounting_asset"]
@@ -328,6 +429,30 @@ def _calculator_agents(tool_name: str) -> tuple[str, ...]:
     return tuple(agents)
 
 
+def _equity_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in EQUITY_MARKET_CALCULATORS:
+        agents.append("market_analysis")
+    if tool_name in EQUITY_MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in EQUITY_STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    return tuple(agents)
+
+
+def _debt_calculator_agents(tool_name: str) -> tuple[str, ...]:
+    agents = ["financial_accounting_asset"]
+    if tool_name in DEBT_MARKET_CALCULATORS:
+        agents.append("market_analysis")
+    if tool_name in DEBT_ECONOMIST_CALCULATORS:
+        agents.append("economist")
+    if tool_name in DEBT_MANAGEMENT_CALCULATORS:
+        agents.append("business_management")
+    if tool_name in DEBT_STRATEGY_CALCULATORS:
+        agents.append("business_strategy")
+    return tuple(agents)
+
+
 CALCULATOR_DEFINITIONS = tuple(
     ToolDefinition(
         calculator,
@@ -338,7 +463,32 @@ CALCULATOR_DEFINITIONS = tuple(
     for calculator in FINANCE_CALCULATOR_TOOLS
 )
 
-DEFINITIONS = (*CORE_DEFINITIONS, *CALCULATOR_DEFINITIONS)
+EQUITY_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _equity_calculator_agents(calculator.name),
+        "equity_calculator",
+        "Local deterministic equity finance formula",
+    )
+    for calculator in EQUITY_CALCULATOR_TOOLS
+)
+
+DEBT_CALCULATOR_DEFINITIONS = tuple(
+    ToolDefinition(
+        calculator,
+        _debt_calculator_agents(calculator.name),
+        "debt_calculator",
+        "Local deterministic debt and fixed-income formula",
+    )
+    for calculator in DEBT_CALCULATOR_TOOLS
+)
+
+DEFINITIONS = (
+    *CORE_DEFINITIONS,
+    *CALCULATOR_DEFINITIONS,
+    *EQUITY_CALCULATOR_DEFINITIONS,
+    *DEBT_CALCULATOR_DEFINITIONS,
+)
 
 TOOL_REGISTRY = {definition.tool.name: definition for definition in DEFINITIONS}
 

@@ -9,6 +9,8 @@ from kapexai.tools.charts import (
     create_waterfall_chart,
 )
 from kapexai.tools.presentation import build_ppt
+from kapexai.tools.debt_calculators import DEBT_CALCULATOR_TOOLS
+from kapexai.tools.equity_calculators import EQUITY_CALCULATOR_TOOLS
 from kapexai.tools.finance_calculators import FINANCE_CALCULATOR_TOOLS
 from kapexai.tools.registry import (
     get_tool,
@@ -29,6 +31,8 @@ __all__ = [
     "create_line_chart",
     "create_waterfall_chart",
     "configure_tool_cache",
+    "DEBT_CALCULATOR_TOOLS",
+    "EQUITY_CALCULATOR_TOOLS",
     "FINANCE_CALCULATOR_TOOLS",
     "get_tool",
     "get_tools_for_agent",
